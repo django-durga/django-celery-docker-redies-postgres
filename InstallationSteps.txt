@@ -1,0 +1,79 @@
+docker commands for service up
+
+1)  go to folder  django-celery/proj/
+  
+2)  execute the below command :
+  
+     docker-compose up --build
+
+3) check the services  status on other terminal using the below command
+
+     docker ps
+	 
+we will get below ouptput for successful running of four services
+
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                    NAMES
+39a0ede23a69        proj_web            "bash -c 'python3 /c…"   About a minute ago   Up 5 seconds        0.0.0.0:8000->8000/tcp   proj_web_1
+41256ecb26ec        proj_celery         "celery -A proj work…"   About a minute ago   Up 56 seconds       8000/tcp                 proj_celery_1
+4385f420e25f        postgres:9.6.5      "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:5432->5432/tcp   proj_db_1
+b4782e99e901        redis:alpine        "docker-entrypoint.s…"   About a minute ago   Up About a minute   6379/tcp                 proj_redis_1
+
+
+
+
+end points usuage:
+
+
+1)normal user create:
+
+
+curl -X POST -H 'Content-Type:application/json' http://0.0.0.0:8000/customer/users/  -d '{"username":"durga","password":"prasadprasad","is_staff":"False"}'
+
+##here "is_staff":"False"   means he is normal user 
+
+
+2)authenticated user create:
+
+
+curl -X POST -H 'Content-Type:application/json' http://0.0.0.0:8000/customer/users/  -d '{"username":"prasad","password":"prasadprasad","is_staff":"True"}'
+
+##here "is_staff":"True" means, he can able to do Create,update,delete on customers details
+
+
+3)view users :
+
+curl -X GET http://0.0.0.0:8000/customer/users/
+ 
+
+4)user get token:
+
+curl -X POST -d  "username=prasad&password=prasadprasad" http://0.0.0.0:8000/users/token/
+
+
+response:
+
+{"refresh":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU4NjI5MTQwNiwianRpIjoiOWZkYjA5ZDMyNzU3NGM5ZmJhZmY1OWE0MTc2YmIxZmMiLCJ1c2VyX2lkIjoxfQ.X7Z2Cpn8hL8Z_FtvVZgMaNHpOUzHPu1VO5La3_BlT2s",
+"access":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTg2Mzc3ODA2LCJqdGkiOiJkY2JmNTg4NDQ4Mzk0MjVlYTEyOTMzYzQ3ZjdhNGEzZCIsInVzZXJfaWQiOjF9.dHjATkjE86Rk4NXMdIof4wNOAZutIZEtmPUD1A7Xj0s"}
+
+
+use access token for below end points:
+
+5)view customer list:
+
+curl -X GET -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTg2Mzc3ODA2LCJqdGkiOiJkY2JmNTg4NDQ4Mzk0MjVlYTEyOTMzYzQ3ZjdhNGEzZCIsInVzZXJfaWQiOjF9.dHjATkjE86Rk4NXMdIof4wNOAZutIZEtmPUD1A7Xj0s" http://0.0.0.0:8000/customer/list/
+
+
+
+6)customer create:
+
+curl -X POST -H 'Content-Type:application/json' -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTg2Mzc3ODA2LCJqdGkiOiJkY2JmNTg4NDQ4Mzk0MjVlYTEyOTMzYzQ3ZjdhNGEzZCIsInVzZXJfaWQiOjF9.dHjATkjE86Rk4NXMdIof4wNOAZutIZEtmPUD1A7Xj0s" http://0.0.0.0:8000/customer/create/ -d '{"name":"prasadd","address":"bangalorae","email":"durgaprasad@indiqube.com"}'
+
+
+7)update customer details with id:
+
+ curl -X PUT -H 'Content-Type:application/json' -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTg2Mzc3ODA2LCJqdGkiOiJkY2JmNTg4NDQ4Mzk0MjVlYTEyOTMzYzQ3ZjdhNGEzZCIsInVzZXJfaWQiOjF9.dHjATkjE86Rk4NXMdIof4wNOAZutIZEtmPUD1A7Xj0s" http://0.0.0.0:8000/customer/1/ -d '{"name":"prasadddd","address":"bangalorae","email":"durgaprasad@indiqube.com}'
+ 
+8) delete customer with id:
+ 
+ 
+ curl -X DELETE  -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTg2Mzc3ODA2LCJqdGkiOiJkY2JmNTg4NDQ4Mzk0MjVlYTEyOTMzYzQ3ZjdhNGEzZCIsInVzZXJfaWQiOjF9.dHjATkjE86Rk4NXMdIof4wNOAZutIZEtmPUD1A7Xj0s" http://0.0.0.0:8000/customer/2/ 
